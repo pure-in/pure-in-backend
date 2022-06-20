@@ -26,12 +26,45 @@ admin.initializeApp({
   credential: admin.credential.cert(credFirebase),
 });
 
-// const db = admin.firestore();
+const db = admin.firestore();
 
 app.post('/webhook', (req, res) => {
-  console.log('New verified request from Saweria!');
-  console.log(req.body);
-  res.sendStatus(200);
+  const { amount_raw, cut } = req.body;
+  const Ref = db.collection('donations');
+  const amount = amount_raw - cut;
+  return Ref.doc('00000000-0000-0000-0000-000000000000')
+    .set(req.body)
+    .then(() =>
+      db
+        .collection('configs')
+        .doc('saweria')
+        .update({
+          recap_donation_this_month: FieldValue.increment(amount),
+          recap_donation_this_year: FieldValue.increment(amount),
+          recap_donation_total: FieldValue.increment(amount),
+        })
+    )
+    .then(() => res.sendStatus(200))
+    .catch((err) => {
+      console.log(err);
+      return res.sendStatus(500);
+    });
+});
+
+app.get('/donations', (_, res) => {
+  const docRef = db.collection('configs').doc('saweria');
+
+  return docRef
+    .get()
+    .then((result) => {
+      if (!result.exists) return res.sendStatus(404);
+      const data = result.data();
+      return res.json(data);
+    })
+    .catch((err) => {
+      console.log(err);
+      return res.sendStatus(500);
+    });
 });
 
 app.all('*', (_, res) => {
