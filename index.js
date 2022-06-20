@@ -34,6 +34,10 @@ app.post('/webhook', (req, res) => {
   res.sendStatus(200);
 });
 
+app.all('*', (_, res) => {
+  return res.json({ message: 'hello world' });
+});
+
 app.listen(PORT, () => {
   console.log('aplikasi jalan di di port ', PORT);
 });
