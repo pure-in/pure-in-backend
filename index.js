@@ -1,12 +1,13 @@
 'use strict';
 require('dotenv').config();
+const cors = require('cors');
 const express = require('express');
 const app = express();
 const admin = require('firebase-admin');
 const { FieldValue } = require('firebase-admin/firestore');
 app.use(express.json()); // for parsing application/json
 app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
-
+app.use(cors());
 const PORT = process.env.PORT ?? 4000;
 
 const credFirebase = {
